@@ -69,7 +69,7 @@ export function LandingPage({ onStartScan, onOpenHistory, historyCount }: Landin
 
             {/* Title with rotating word */}
             <div className="mb-3">
-              <h1 className="text-5xl font-serif text-foreground tracking-tight">
+              <h1 className="text-4xl sm:text-5xl font-serif text-foreground tracking-tight whitespace-nowrap">
                 music{' '}
                 <span 
                   className={`inline-block text-primary transition-all duration-200 ${
