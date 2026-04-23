@@ -27,6 +27,7 @@ interface SwipeFactsProps {
 
 export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [direction, setDirection] = useState(0) // -1 for left, 1 for right
   const [touchStart, setTouchStart] = useState<number | null>(null)
 
   useEffect(() => {
@@ -43,11 +44,17 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
   const hasPrev = currentIndex > 0
 
   const goNext = () => {
-    if (hasNext) setCurrentIndex(prev => prev + 1)
+    if (hasNext) {
+      setDirection(1)
+      setCurrentIndex(prev => prev + 1)
+    }
   }
 
   const goPrev = () => {
-    if (hasPrev) setCurrentIndex(prev => prev - 1)
+    if (hasPrev) {
+      setDirection(-1)
+      setCurrentIndex(prev => prev - 1)
+    }
   }
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -71,6 +78,21 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
 
   if (!currentFact) return null
 
+  const slideVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 80 : -80,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -80 : 80,
+      opacity: 0,
+    }),
+  }
+
   return (
     <>
       <style jsx global>{`
@@ -93,13 +115,18 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
           className="fact-scroll flex-1 overflow-y-auto min-h-0 mb-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentIndex}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ 
+                x: { type: "tween", duration: 0.25, ease: [0.25, 0.1, 0.25, 1] },
+                opacity: { duration: 0.2 }
+              }}
               className="pt-4"
             >
               {/* Category tag */}
