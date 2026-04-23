@@ -1,6 +1,6 @@
 export interface MusicFact {
   id: string
-  category: 'artist' | 'album' | 'gear' | 'production' | 'history' | 'connection'
+  category: 'artist' | 'album' | 'gear' | 'production' | 'history' | 'connection' | 'soundtrack' | 'cultural'
   headline: string
   details: string
   source?: string
@@ -12,7 +12,7 @@ export interface ScanResult {
   timestamp: number
   imageUrl: string
   identified: {
-    type: 'album' | 'artist' | 'poster' | 'setlist' | 'gear' | 'unknown'
+    type: 'album' | 'artist' | 'poster' | 'setlist' | 'gear' | 'toy' | 'movie' | 'product' | 'other' | 'unknown'
     name: string
     artist?: string
     year?: string

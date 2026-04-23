@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Disc3, Album, Settings2, Mic2, Clock, Link2, Loader2, ChevronRight, ExternalLink } from 'lucide-react'
+import { Disc3, Album, Settings2, Mic2, Clock, Link2, Loader2, ChevronRight, ExternalLink, Film, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MusicFact } from '@/lib/types'
 
@@ -13,6 +13,8 @@ const categoryConfig: Record<string, { icon: typeof Mic2; label: string; color: 
   production: { icon: Disc3, label: 'PRODUCTION', color: 'text-emerald-400' },
   history: { icon: Clock, label: 'HISTORY', color: 'text-purple-400' },
   connection: { icon: Link2, label: 'CONNECTION', color: 'text-cyan-400' },
+  soundtrack: { icon: Film, label: 'SOUNDTRACK', color: 'text-orange-400' },
+  cultural: { icon: Sparkles, label: 'CULTURAL', color: 'text-rose-400' },
 }
 
 const defaultConfig = { icon: Disc3, label: 'FACT', color: 'text-gray-400' }
