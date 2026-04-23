@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { motion, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion'
-import { Disc3, Album, Settings2, Mic2, Clock, Link2, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Disc3, Album, Settings2, Mic2, Clock, Link2, Loader2, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MusicFact } from '@/lib/types'
 
@@ -25,29 +25,13 @@ interface SwipeFactsProps {
 
 export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [direction, setDirection] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const x = useMotionValue(0)
-  const [containerWidth, setContainerWidth] = useState(0)
+  const [touchStart, setTouchStart] = useState<number | null>(null)
 
   useEffect(() => {
     if (currentIndex === 1 && onRequestMore) {
       onRequestMore()
     }
   }, [currentIndex, onRequestMore])
-
-  useEffect(() => {
-    if (containerRef.current) {
-      setContainerWidth(containerRef.current.offsetWidth)
-    }
-    const handleResize = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth)
-      }
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
 
   const currentFact = facts[currentIndex]
   const config = categoryConfig[currentFact?.category] || defaultConfig
@@ -56,118 +40,121 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
   const hasNext = currentIndex < facts.length - 1
   const hasPrev = currentIndex > 0
 
-  const handleDragEnd = (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
-    const threshold = containerWidth * 0.15
-    const velocity = info.velocity.x
-    const offset = info.offset.x
-
-    if ((offset < -threshold || velocity < -300) && hasNext) {
-      setDirection(-1)
-      animate(x, -containerWidth, { 
-        type: "tween", 
-        duration: 0.3,
-        ease: [0.32, 0.72, 0, 1],
-        onComplete: () => {
-          setCurrentIndex(prev => prev + 1)
-          x.set(0)
-        }
-      })
-    } else if ((offset > threshold || velocity > 300) && hasPrev) {
-      setDirection(1)
-      animate(x, containerWidth, { 
-        type: "tween", 
-        duration: 0.3,
-        ease: [0.32, 0.72, 0, 1],
-        onComplete: () => {
-          setCurrentIndex(prev => prev - 1)
-          x.set(0)
-        }
-      })
-    } else {
-      animate(x, 0, { type: "tween", duration: 0.25, ease: [0.32, 0.72, 0, 1] })
-    }
+  const goNext = () => {
+    if (hasNext) setCurrentIndex(prev => prev + 1)
   }
 
-  const opacity = useTransform(x, [-containerWidth * 0.5, 0, containerWidth * 0.5], [0.3, 1, 0.3])
-  const scale = useTransform(x, [-containerWidth * 0.5, 0, containerWidth * 0.5], [0.95, 1, 0.95])
+  const goPrev = () => {
+    if (hasPrev) setCurrentIndex(prev => prev - 1)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX)
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return
+    const touchEnd = e.changedTouches[0].clientX
+    const diff = touchStart - touchEnd
+
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && hasNext) {
+        goNext()
+      } else if (diff < 0 && hasPrev) {
+        goPrev()
+      }
+    }
+    setTouchStart(null)
+  }
 
   if (!currentFact) return null
 
   return (
-    <div className="absolute inset-0 flex flex-col" ref={containerRef}>
-      {/* Full screen swipeable overlay */}
-      <motion.div
-        style={{ x }}
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.05}
-        onDragEnd={handleDragEnd}
-        className="flex-1 flex flex-col justify-end touch-pan-y cursor-grab active:cursor-grabbing"
-      >
-        <motion.div 
-          style={{ opacity, scale }}
-          className="flex flex-col justify-end h-full"
-        >
-          {/* Clean gradient overlay - no blur */}
-          <div className="relative">
-            {/* Simple gradient fade - no blur distortion */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+    <div 
+      className="absolute inset-0 flex flex-col"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Gradient overlay covering bottom 60% of screen */}
+      <div className="absolute inset-x-0 bottom-0 h-[65%] bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none" />
+      
+      {/* Content area - starts from 40% down the screen */}
+      <div className="absolute inset-x-0 bottom-0 top-[35%] flex flex-col justify-end px-5 pb-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="flex flex-col"
+          >
+            {/* Category tag */}
+            <div className={cn(
+              "inline-flex items-center gap-1.5 text-[10px] font-medium tracking-wider uppercase mb-3",
+              config.color
+            )}>
+              <Icon className="w-3 h-3" />
+              {config.label}
+            </div>
             
-            {/* Content */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="relative z-10 px-5 pb-10 pt-24"
-              >
-                {/* Category tag */}
-                <div className={cn(
-                  "inline-flex items-center gap-1.5 text-[10px] font-medium tracking-wider uppercase mb-3 opacity-80",
-                  config.color
-                )}>
-                  <Icon className="w-3 h-3" />
-                  {config.label}
-                </div>
-                
-                {/* Headline */}
-                <h3 className="text-2xl font-serif text-white leading-snug mb-3">
-                  {currentFact.headline}
-                </h3>
-                
-                {/* Details */}
-                <p className="text-white/75 text-[15px] leading-relaxed mb-6">
-                  {currentFact.details}
-                </p>
+            {/* Headline */}
+            <h3 className="text-2xl font-serif text-white leading-snug mb-4">
+              {currentFact.headline}
+            </h3>
+            
+            {/* Details */}
+            <p className="text-white/80 text-base leading-relaxed">
+              {currentFact.details}
+            </p>
+          </motion.div>
+        </AnimatePresence>
 
-                {/* Simple dot indicators */}
-                <div className="flex items-center justify-center gap-2.5">
-                  {facts.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setDirection(i > currentIndex ? -1 : 1)
-                        setCurrentIndex(i)
-                      }}
-                      className={cn(
-                        "w-2 h-2 rounded-full transition-opacity duration-200",
-                        i === currentIndex 
-                          ? "bg-white" 
-                          : "bg-white/30"
-                      )}
-                    />
-                  ))}
-                  {isLoadingMore && (
-                    <Loader2 className="w-3 h-3 animate-spin text-white/40 ml-1" />
-                  )}
-                </div>
-              </motion.div>
-            </AnimatePresence>
+        {/* Bottom bar with dots and next hint */}
+        <div className="mt-auto pt-8 flex items-center justify-between">
+          {/* Dots */}
+          <div className="flex items-center gap-2">
+            {facts.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full transition-all duration-200",
+                  i === currentIndex 
+                    ? "bg-white" 
+                    : "bg-white/25"
+                )}
+              />
+            ))}
+            {isLoadingMore && (
+              <Loader2 className="w-3 h-3 animate-spin text-white/30 ml-1" />
+            )}
           </div>
-        </motion.div>
-      </motion.div>
+          
+          {/* Next hint */}
+          {hasNext && (
+            <button 
+              onClick={goNext}
+              className="flex items-center gap-1 text-white/40 text-xs"
+            >
+              <span>next</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {/* Invisible tap zones for navigation */}
+      <button 
+        onClick={goPrev}
+        className="absolute left-0 top-0 bottom-0 w-1/4 z-10"
+        aria-label="Previous fact"
+      />
+      <button 
+        onClick={goNext}
+        className="absolute right-0 top-0 bottom-0 w-1/4 z-10"
+        aria-label="Next fact"
+      />
     </div>
   )
 }
