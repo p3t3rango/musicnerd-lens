@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, Share2, Bookmark, BookmarkCheck } from 'lucide-react'
+import { ArrowLeft, Share2, Bookmark, BookmarkCheck, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FactCard } from './fact-card'
 import type { ScanResult } from '@/lib/types'
@@ -21,7 +21,7 @@ export function ResultsView({ result, onBack, onSave, isSaved }: ResultsViewProp
           text: `Check out these facts about ${result.identified.name}!`,
           url: window.location.href
         })
-      } catch (e) {
+      } catch {
         // User cancelled or share failed
       }
     }
@@ -29,21 +29,52 @@ export function ResultsView({ result, onBack, onSave, isSaved }: ResultsViewProp
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with image */}
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10" />
-        <img
-          src={result.imageUrl}
-          alt={result.identified.name}
-          className="w-full h-64 object-cover"
+      {/* Hero image section */}
+      <div className="relative h-80">
+        {/* Background blur */}
+        <div 
+          className="absolute inset-0 scale-110 blur-2xl opacity-50"
+          style={{ 
+            backgroundImage: `url(${result.imageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
         />
-        <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between">
-          <Button variant="secondary" size="icon" onClick={onBack} className="bg-background/80 backdrop-blur">
+        
+        {/* Gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-transparent to-background" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+        
+        {/* Main image */}
+        <div className="absolute inset-0 flex items-center justify-center pt-16">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/30 rounded-2xl blur-2xl scale-105" />
+            <img
+              src={result.imageUrl}
+              alt={result.identified.name}
+              className="relative w-44 h-44 object-cover rounded-2xl shadow-2xl"
+            />
+          </div>
+        </div>
+        
+        {/* Navigation */}
+        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onBack} 
+            className="rounded-full w-11 h-11 bg-background/30 backdrop-blur-md border border-white/10 hover:bg-background/50"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex gap-2">
             {onSave && (
-              <Button variant="secondary" size="icon" onClick={onSave} className="bg-background/80 backdrop-blur">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onSave} 
+                className="rounded-full w-11 h-11 bg-background/30 backdrop-blur-md border border-white/10 hover:bg-background/50"
+              >
                 {isSaved ? (
                   <BookmarkCheck className="h-5 w-5 text-primary" />
                 ) : (
@@ -51,7 +82,12 @@ export function ResultsView({ result, onBack, onSave, isSaved }: ResultsViewProp
                 )}
               </Button>
             )}
-            <Button variant="secondary" size="icon" onClick={handleShare} className="bg-background/80 backdrop-blur">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleShare} 
+              className="rounded-full w-11 h-11 bg-background/30 backdrop-blur-md border border-white/10 hover:bg-background/50"
+            >
               <Share2 className="h-5 w-5" />
             </Button>
           </div>
@@ -59,32 +95,38 @@ export function ResultsView({ result, onBack, onSave, isSaved }: ResultsViewProp
       </div>
 
       {/* Content */}
-      <div className="px-4 pb-8 -mt-8 relative z-20">
-        {/* Identified item */}
-        <div className="mb-6">
-          <span className="text-xs font-medium uppercase tracking-wide text-primary">
+      <div className="px-5 pb-10 -mt-6 relative z-20">
+        {/* Identified item info */}
+        <div className="mb-8 text-center">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-3">
+            <Sparkles className="h-3 w-3" />
             {result.identified.type}
           </span>
-          <h1 className="text-2xl font-bold text-foreground mt-1 text-balance">
+          <h1 className="text-2xl font-bold text-foreground text-balance">
             {result.identified.name}
           </h1>
           {result.identified.artist && (
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-muted-foreground mt-1">
               {result.identified.artist}
             </p>
           )}
           {result.identified.year && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground/60 mt-0.5 font-mono">
               {result.identified.year}
             </p>
           )}
         </div>
 
-        {/* Facts */}
+        {/* Facts section */}
         <div className="space-y-3">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            The Nerd Facts
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              The Nerd Facts
+            </h2>
+            <span className="text-xs text-muted-foreground/50 font-mono">
+              {result.facts.length} facts
+            </span>
+          </div>
           {result.facts.map((fact, index) => (
             <FactCard key={fact.id} fact={fact} index={index} />
           ))}
