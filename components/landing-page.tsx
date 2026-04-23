@@ -84,15 +84,15 @@ export function LandingPage({ onStartScan, onOpenHistory, historyCount }: Landin
             </div>
 
             {/* Title with rotating word */}
-            <div className="mb-4">
-              <h1 className="text-4xl font-bold text-foreground tracking-tight">
-                Music{' '}
+            <div className="mb-6">
+              <h1 className="text-5xl font-serif font-medium text-foreground tracking-tight lowercase">
+                music{' '}
                 <span 
                   className={`inline-block text-primary transition-all duration-200 ${
                     isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
                   }`}
                 >
-                  {rotatingWords[wordIndex]}
+                  {rotatingWords[wordIndex].toLowerCase()}
                 </span>
               </h1>
             </div>

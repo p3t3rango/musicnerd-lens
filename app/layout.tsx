@@ -1,17 +1,16 @@
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans, Space_Mono } from 'next/font/google'
+import { Inter, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const dmSans = DM_Sans({ 
+const inter = Inter({ 
   subsets: ["latin"],
   variable: '--font-sans',
-  weight: ['400', '500', '600', '700']
 });
-const spaceMono = Space_Mono({ 
+const playfair = Playfair_Display({ 
   subsets: ["latin"],
-  variable: '--font-mono',
-  weight: ['400', '700']
+  variable: '--font-serif',
+  weight: ['400', '500', '600', '700']
 });
 
 export const metadata: Metadata = {
@@ -45,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${dmSans.variable} ${spaceMono.variable} font-sans antialiased bg-background`}>
+      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-background`}>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

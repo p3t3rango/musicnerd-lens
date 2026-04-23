@@ -102,8 +102,8 @@ export function ResultsView({ result, onBack, onSave, isSaved }: ResultsViewProp
             <Sparkles className="h-3 w-3" />
             {result.identified.type}
           </span>
-          <h1 className="text-2xl font-bold text-foreground text-balance">
-            {result.identified.name}
+          <h1 className="text-3xl font-serif font-medium text-foreground text-balance lowercase">
+            {result.identified.name.toLowerCase()}
           </h1>
           {result.identified.artist && (
             <p className="text-lg text-muted-foreground mt-1">

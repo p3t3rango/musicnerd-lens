@@ -95,8 +95,8 @@ export function AnalyzingView({ imageUrl }: AnalyzingViewProps) {
 
         {/* Text */}
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-foreground mb-2">
-            Analyzing
+          <h2 className="text-2xl font-serif font-medium text-foreground mb-2 lowercase">
+            analyzing
           </h2>
           <p className="text-muted-foreground h-6 transition-opacity duration-200">
             {loadingMessages[messageIndex]}
