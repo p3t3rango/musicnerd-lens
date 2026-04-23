@@ -76,7 +76,7 @@
 
 @theme inline {
   --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
-  --font-serif: 'Playfair Display', 'Playfair Display Fallback', Georgia, serif;
+  --font-serif: 'Libre Baskerville', 'Libre Baskerville Fallback', Georgia, serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
