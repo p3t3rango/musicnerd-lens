@@ -72,78 +72,71 @@ export function ResultsView({ result, onBack, onSave, isSaved }: ResultsViewProp
           alt={result.identified.name}
           className="w-full h-full object-cover"
         />
-        {/* Layered gradients for depth */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent" />
-        {/* Subtle vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,black_100%)] opacity-40" />
+        {/* Subtle vignette only - overlays handle the rest */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,black_100%)] opacity-30" />
       </div>
 
-      {/* Content overlay */}
-      <div className="relative z-10 flex flex-col h-full">
-        {/* Navigation bar */}
-        <div className="flex items-center justify-between p-4 pt-safe">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={onBack} 
-            className="rounded-full w-10 h-10 bg-black/40 backdrop-blur-xl border border-white/10 hover:bg-black/60 text-white"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex gap-2">
-            {onSave && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={onSave} 
-                className="rounded-full w-10 h-10 bg-black/40 backdrop-blur-xl border border-white/10 hover:bg-black/60 text-white"
-              >
-                {isSaved ? (
-                  <BookmarkCheck className="h-5 w-5 text-primary" />
-                ) : (
-                  <Bookmark className="h-5 w-5" />
-                )}
-              </Button>
-            )}
+      {/* Navigation bar - fixed on top */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 pt-safe">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onBack} 
+          className="rounded-full w-10 h-10 bg-black/30 backdrop-blur-xl border border-white/10 hover:bg-black/50 text-white"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex gap-2">
+          {onSave && (
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={handleShare} 
-              className="rounded-full w-10 h-10 bg-black/40 backdrop-blur-xl border border-white/10 hover:bg-black/60 text-white"
+              onClick={onSave} 
+              className="rounded-full w-10 h-10 bg-black/30 backdrop-blur-xl border border-white/10 hover:bg-black/50 text-white"
             >
-              <Share2 className="h-5 w-5" />
+              {isSaved ? (
+                <BookmarkCheck className="h-5 w-5 text-primary" />
+              ) : (
+                <Bookmark className="h-5 w-5" />
+              )}
             </Button>
-          </div>
-        </div>
-
-        {/* Identified item info */}
-        <div className="px-5 pt-2">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/5 mb-3">
-            <Sparkles className="h-3 w-3 text-primary" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
-              {result.identified.type}
-            </span>
-          </div>
-          <h1 className="text-3xl font-serif text-white text-balance lowercase leading-tight">
-            {result.identified.name.toLowerCase()}
-          </h1>
-          {result.identified.artist && result.identified.artist !== result.identified.name && (
-            <p className="text-base text-white/50 mt-1">
-              {result.identified.artist}
-            </p>
           )}
-          {result.identified.year && (
-            <p className="text-xs text-white/30 mt-0.5 font-mono">
-              {result.identified.year}
-            </p>
-          )}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleShare} 
+            className="rounded-full w-10 h-10 bg-black/30 backdrop-blur-xl border border-white/10 hover:bg-black/50 text-white"
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
         </div>
+      </div>
 
-        {/* Spacer */}
-        <div className="flex-1" />
+      {/* Identified item info - fixed top left, below nav */}
+      <div className="absolute top-20 left-0 right-0 z-20 px-5">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/5 mb-3">
+          <Sparkles className="h-3 w-3 text-primary" />
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
+            {result.identified.type}
+          </span>
+        </div>
+        <h1 className="text-3xl font-serif text-white text-balance lowercase leading-tight drop-shadow-lg">
+          {result.identified.name.toLowerCase()}
+        </h1>
+        {result.identified.artist && result.identified.artist !== result.identified.name && (
+          <p className="text-base text-white/60 mt-1 drop-shadow-md">
+            {result.identified.artist}
+          </p>
+        )}
+        {result.identified.year && (
+          <p className="text-xs text-white/40 mt-0.5 font-mono drop-shadow-md">
+            {result.identified.year}
+          </p>
+        )}
+      </div>
 
-        {/* Swipeable facts */}
+      {/* Full-screen swipeable facts overlay */}
+      <div className="absolute inset-0 z-10">
         <SwipeFacts 
           facts={facts} 
           isLoadingMore={isLoadingMore}
