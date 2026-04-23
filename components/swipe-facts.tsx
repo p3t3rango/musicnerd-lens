@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Disc3, Album, Settings2, Mic2, Clock, Link2, Loader2, ChevronRight } from 'lucide-react'
+import { Disc3, Album, Settings2, Mic2, Clock, Link2, Loader2, ChevronRight, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MusicFact } from '@/lib/types'
 
@@ -118,6 +118,26 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
               <p className="text-white/80 text-base leading-relaxed">
                 {currentFact.details}
               </p>
+              
+              {/* Source link */}
+              {currentFact.source && (
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  {currentFact.sourceUrl ? (
+                    <a 
+                      href={currentFact.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-white/50 text-sm hover:text-white/70 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span>{currentFact.source}</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <span className="text-white/40 text-sm">{currentFact.source}</span>
+                  )}
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>

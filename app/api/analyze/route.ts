@@ -8,6 +8,8 @@ const QUICK_PROMPT = `You are MusicNerd, a passionate music expert. Analyze this
 
 Identify what you see and give exactly 3 punchy facts. Be fast and exciting!
 
+IMPORTANT: For each fact, include a real, working URL to a credible source where users can learn more. Use sources like Wikipedia, Discogs, AllMusic, official artist sites, or music publications.
+
 Respond in this exact JSON format:
 {
   "identified": {
@@ -21,7 +23,8 @@ Respond in this exact JSON format:
       "category": "artist" | "album" | "gear" | "production" | "history" | "connection",
       "headline": "Short punchy headline (max 8 words)",
       "details": "Quick explanation (1-2 sentences)",
-      "source": "Optional source"
+      "source": "Source name (e.g. Wikipedia, Discogs)",
+      "sourceUrl": "https://full-url-to-source.com"
     }
   ]
 }
@@ -40,6 +43,8 @@ Now dig DEEPER. Provide exactly 4 MORE fascinating facts that are:
 - Include specific details (names, dates, gear models)
 - Connect to other artists or cultural moments
 
+IMPORTANT: For each fact, include a real, working URL to a credible source. Use Wikipedia, Discogs, AllMusic, Pitchfork, official sites, or music publications.
+
 Respond in this exact JSON format:
 {
   "facts": [
@@ -47,7 +52,8 @@ Respond in this exact JSON format:
       "category": "artist" | "album" | "gear" | "production" | "history" | "connection",
       "headline": "Short punchy headline (max 8 words)",
       "details": "Detailed explanation (2-3 sentences)",
-      "source": "Source attribution"
+      "source": "Source name",
+      "sourceUrl": "https://full-url-to-source.com"
     }
   ]
 }
@@ -93,7 +99,7 @@ export async function POST(request: Request) {
 
       const parsed = JSON.parse(jsonStr.trim())
 
-      const facts = parsed.facts.map((fact: { category: string; headline: string; details: string; source?: string }, index: number) => ({
+      const facts = parsed.facts.map((fact: { category: string; headline: string; details: string; source?: string; sourceUrl?: string }, index: number) => ({
         ...fact,
         id: `fact-${Date.now()}-${index}`
       }))
@@ -134,7 +140,7 @@ export async function POST(request: Request) {
 
       const parsed = JSON.parse(jsonStr.trim())
 
-      const facts = parsed.facts.map((fact: { category: string; headline: string; details: string; source?: string }, index: number) => ({
+      const facts = parsed.facts.map((fact: { category: string; headline: string; details: string; source?: string; sourceUrl?: string }, index: number) => ({
         ...fact,
         id: `fact-deep-${Date.now()}-${index}`
       }))

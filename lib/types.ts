@@ -4,6 +4,7 @@ export interface MusicFact {
   headline: string
   details: string
   source?: string
+  sourceUrl?: string
 }
 
 export interface ScanResult {
