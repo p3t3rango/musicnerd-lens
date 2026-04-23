@@ -70,18 +70,27 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
   if (!currentFact) return null
 
   return (
-    <div 
-      className="absolute inset-0 flex flex-col"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
+    <>
+      <style jsx global>{`
+        .fact-scroll::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+      <div 
+        className="absolute inset-0 flex flex-col"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
       {/* Gradient overlay - extends higher to cover scroll area */}
       <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black via-black/80 via-50% to-transparent pointer-events-none" />
       
       {/* Content container - bounded area that won't overlap header */}
       <div className="absolute inset-x-0 bottom-0 top-[28%] flex flex-col px-5 pb-6">
         {/* Scrollable fact content */}
-        <div className="flex-1 overflow-y-auto min-h-0 mb-4 scrollbar-hide">
+        <div 
+          className="fact-scroll flex-1 overflow-y-auto min-h-0 mb-4"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -159,5 +168,6 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
         aria-label="Next fact"
       />
     </div>
+    </>
   )
 }
