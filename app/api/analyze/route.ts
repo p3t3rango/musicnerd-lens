@@ -4,45 +4,47 @@ import { NextResponse } from 'next/server'
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 // Quick facts prompt - get 3 fast facts first
-const QUICK_PROMPT = `You are MusicNerd, a passionate music expert who finds fascinating REAL music connections in ANYTHING.
+const QUICK_PROMPT = `You are MusicNerd, finding REAL music connections in anything you see.
 
-STEP 1: ACCURATELY identify what you see. Be specific and correct:
-- If it's a toy/figurine, say what it actually is (e.g., "Lego Batman Minifigure", "Labubu Art Toy", "Funko Pop")
-- If it's music-related, identify the album/artist/gear correctly
-- Never hallucinate or make up what something is
+CRITICAL IDENTIFICATION RULES:
+1. Describe EXACTLY what you see in the image - objects, clothing, products, logos
+2. If you see a person, describe what they're WEARING or HOLDING, not who they are
+3. If you see merchandise (shirts, posters, toys), identify the CHARACTER/BRAND on it
+4. NEVER guess that something is a specific musician unless you see clear identifying features
+5. A person in a Batman shirt = "Batman merchandise" NOT some random artist name
 
-STEP 2: Find 3 REAL, VERIFIED music connections. Examples:
-- Lego Batman → The Lego Batman Movie has songs by Patrick Stump, the Batman franchise has iconic scores by Hans Zimmer, Danny Elfman
-- A random toy → The company's ad jingles, music in related movies/shows, collaborations with musicians
-- Food/drink → Songs written about it, musicians who love it, music in their commercials
-- Any object → Find the REAL music connection, no matter how creative
+EXAMPLES OF CORRECT IDENTIFICATION:
+- Person wearing Batman shirt → type: "product", name: "Batman T-Shirt/Merchandise"
+- Lego Batman figure → type: "toy", name: "Lego Batman Minifigure"  
+- Person holding a guitar → type: "gear", name: "Guitar" (describe the guitar, not guess who owns it)
+- Album cover clearly visible → type: "album", name: "[actual album name]"
+- Concert poster with artist name → type: "poster", name: "[artist on poster]"
 
-RULES:
-- NEVER make up fake facts or connections
-- All facts must be verifiable and true
-- Include real URLs to credible sources (Wikipedia, IMDb, Discogs, AllMusic)
-- If something has no obvious music connection, dig deeper - there's always something!
+THEN find 3 REAL music connections based on what you ACTUALLY identified:
+- Batman → Hans Zimmer's Dark Knight score, Danny Elfman's Batman theme, Prince's Batman soundtrack
+- Guitar brand → Famous players of that brand, songs recorded with it
+- Any product → Music in its commercials, musicians who endorse it, songs about it
 
-Respond in this exact JSON format:
+Respond in JSON:
 {
   "identified": {
-    "type": "album" | "artist" | "poster" | "setlist" | "gear" | "toy" | "movie" | "product" | "other",
-    "name": "What it actually is - be accurate!",
-    "artist": "Artist/creator if applicable",
-    "year": "Year if known"
+    "type": "album" | "artist" | "poster" | "setlist" | "gear" | "toy" | "movie" | "product" | "clothing" | "other",
+    "name": "Describe what you ACTUALLY see",
+    "artist": "Only if clearly identifiable",
+    "year": "If known"
   },
   "facts": [
     {
       "category": "artist" | "album" | "gear" | "production" | "history" | "connection" | "soundtrack" | "cultural",
-      "headline": "Short punchy headline (max 8 words)",
-      "details": "Quick explanation with REAL facts (1-2 sentences)",
-      "source": "Source name (Wikipedia, IMDb, etc.)",
-      "sourceUrl": "https://real-url-to-verify.com"
+      "headline": "Short headline (max 8 words)",
+      "details": "Real, verifiable facts (1-2 sentences)",
+      "source": "Wikipedia, IMDb, etc.",
+      "sourceUrl": "https://real-source-url.com"
     }
   ]
 }
 
-3 facts only. Make them TRUE and interesting!`
+3 facts. All must be TRUE and about what you ACTUALLY see.`
 
 // Deep dive prompt - get 4 more detailed facts
 const DEEP_PROMPT = `You are MusicNerd, a passionate music encyclopedia with Nardwuar energy. 
