@@ -1,30 +1,46 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, AnimatePresence, PanInfo } from 'framer-motion'
-import { Disc3, Album, Settings2, Mic2, Clock, Link2, RotateCcw } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
+import { Disc3, Album, Settings2, Mic2, Clock, Link2, ChevronRight, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MusicFact } from '@/lib/types'
 
 const categoryConfig: Record<string, { icon: typeof Mic2; label: string; color: string }> = {
-  artist: { icon: Mic2, label: 'ARTIST', color: 'text-pink-400 bg-pink-500/20 border-pink-500/30' },
-  album: { icon: Album, label: 'ALBUM', color: 'text-blue-400 bg-blue-500/20 border-blue-500/30' },
-  gear: { icon: Settings2, label: 'GEAR', color: 'text-amber-400 bg-amber-500/20 border-amber-500/30' },
-  production: { icon: Disc3, label: 'PRODUCTION', color: 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30' },
-  history: { icon: Clock, label: 'HISTORY', color: 'text-purple-400 bg-purple-500/20 border-purple-500/30' },
-  connection: { icon: Link2, label: 'CONNECTION', color: 'text-cyan-400 bg-cyan-500/20 border-cyan-500/30' },
+  artist: { icon: Mic2, label: 'ARTIST', color: 'text-pink-400' },
+  album: { icon: Album, label: 'ALBUM', color: 'text-blue-400' },
+  gear: { icon: Settings2, label: 'GEAR', color: 'text-amber-400' },
+  production: { icon: Disc3, label: 'PRODUCTION', color: 'text-emerald-400' },
+  history: { icon: Clock, label: 'HISTORY', color: 'text-purple-400' },
+  connection: { icon: Link2, label: 'CONNECTION', color: 'text-cyan-400' },
 }
 
-const defaultConfig = { icon: Disc3, label: 'FACT', color: 'text-gray-400 bg-gray-500/20 border-gray-500/30' }
+const defaultConfig = { icon: Disc3, label: 'FACT', color: 'text-gray-400' }
 
 interface SwipeFactsProps {
   facts: MusicFact[]
-  itemName: string
+  isLoadingMore?: boolean
+  onRequestMore?: () => void
 }
 
-export function SwipeFacts({ facts, itemName }: SwipeFactsProps) {
+export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [direction, setDirection] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const x = useMotionValue(0)
+  const [containerWidth, setContainerWidth] = useState(0)
+
+  // Trigger loading more when user reaches fact 2 (index 1)
+  useEffect(() => {
+    if (currentIndex === 1 && onRequestMore) {
+      onRequestMore()
+    }
+  }, [currentIndex, onRequestMore])
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.offsetWidth)
+    }
+  }, [])
 
   const currentFact = facts[currentIndex]
   const config = categoryConfig[currentFact?.category] || defaultConfig
@@ -32,165 +48,143 @@ export function SwipeFacts({ facts, itemName }: SwipeFactsProps) {
   
   const hasNext = currentIndex < facts.length - 1
   const hasPrev = currentIndex > 0
-  const isComplete = currentIndex >= facts.length
 
-  const goToNext = () => {
-    if (hasNext) {
-      setDirection(1)
-      setCurrentIndex(prev => prev + 1)
-    }
-  }
+  // Smooth progress indicator
+  const progress = useTransform(x, [-containerWidth, 0, containerWidth], [
+    Math.min((currentIndex + 1) / facts.length, 1),
+    currentIndex / facts.length,
+    Math.max((currentIndex - 1) / facts.length, 0)
+  ])
 
-  const goToPrev = () => {
-    if (hasPrev) {
-      setDirection(-1)
-      setCurrentIndex(prev => prev - 1)
-    }
-  }
-
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const threshold = 50
-    const velocity = Math.abs(info.velocity.x)
+  const handleDragEnd = (_: never, info: { offset: { x: number }; velocity: { x: number } }) => {
+    const threshold = containerWidth * 0.2
+    const velocity = info.velocity.x
     const offset = info.offset.x
 
-    if (offset < -threshold || (velocity > 300 && info.velocity.x < 0)) {
-      goToNext()
-    } else if (offset > threshold || (velocity > 300 && info.velocity.x > 0)) {
-      goToPrev()
+    if ((offset < -threshold || velocity < -500) && hasNext) {
+      // Swipe left - next
+      animate(x, -containerWidth, { 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 30,
+        onComplete: () => {
+          setCurrentIndex(prev => prev + 1)
+          x.set(0)
+        }
+      })
+    } else if ((offset > threshold || velocity > 500) && hasPrev) {
+      // Swipe right - prev
+      animate(x, containerWidth, { 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 30,
+        onComplete: () => {
+          setCurrentIndex(prev => prev - 1)
+          x.set(0)
+        }
+      })
+    } else {
+      // Snap back
+      animate(x, 0, { type: "spring", stiffness: 400, damping: 30 })
     }
   }
 
-  const handleReset = () => {
-    setDirection(-1)
-    setCurrentIndex(0)
-  }
+  // Parallax effect for content
+  const contentX = useTransform(x, [-containerWidth, 0, containerWidth], [30, 0, -30])
+  const opacity = useTransform(x, [-containerWidth * 0.5, 0, containerWidth * 0.5], [0.5, 1, 0.5])
 
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? '100%' : '-100%',
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: number) => ({
-      x: direction > 0 ? '-100%' : '100%',
-      opacity: 0,
-    }),
-  }
+  if (!currentFact) return null
 
   return (
-    <div className="absolute inset-x-0 bottom-0 pb-6 px-4">
-      {/* Progress bar */}
-      <div className="flex gap-1.5 justify-center mb-4">
-        {facts.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => {
-              setDirection(idx > currentIndex ? 1 : -1)
-              setCurrentIndex(idx)
-            }}
-            className={cn(
-              "h-1 rounded-full transition-all duration-300",
-              idx === currentIndex 
-                ? "w-8 bg-primary" 
-                : idx < currentIndex
-                  ? "w-3 bg-white/50"
-                  : "w-3 bg-white/20"
-            )}
+    <div className="absolute inset-x-0 bottom-0 pb-8 px-4" ref={containerRef}>
+      {/* Minimal progress bar */}
+      <div className="flex items-center justify-center gap-3 mb-5">
+        <div className="flex-1 max-w-[200px] h-0.5 bg-white/10 rounded-full overflow-hidden">
+          <motion.div 
+            className="h-full bg-primary rounded-full"
+            style={{ width: useTransform(progress, v => `${v * 100}%`) }}
           />
-        ))}
+        </div>
+        <span className="text-white/30 text-xs tabular-nums min-w-[40px]">
+          {currentIndex + 1}/{facts.length}{isLoadingMore && '+'}
+        </span>
       </div>
 
-      {/* Card container */}
-      <div className="relative overflow-hidden min-h-[200px]">
-        <AnimatePresence mode="wait" custom={direction}>
-          {!isComplete ? (
-            <motion.div
-              key={currentIndex}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 400, damping: 35 },
-                opacity: { duration: 0.15 }
-              }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.15}
-              onDragEnd={handleDragEnd}
-              className="cursor-grab active:cursor-grabbing"
-            >
-              {/* Glass card */}
-              <div className="backdrop-blur-xl bg-black/50 border border-white/10 rounded-2xl p-5 shadow-2xl">
-                {/* Header row */}
-                <div className="flex items-center justify-between mb-4">
-                  {/* Category badge */}
-                  <div className={cn(
-                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium tracking-wide border",
-                    config.color
-                  )}>
-                    <Icon className="w-3.5 h-3.5" />
-                    {config.label}
-                  </div>
-                  
-                  {/* Fact counter */}
-                  <span className="text-white/40 text-sm tabular-nums">
-                    {currentIndex + 1} of {facts.length}
-                  </span>
-                </div>
-                
-                {/* Headline */}
-                <h3 className="text-xl font-serif text-white mb-3 leading-snug">
-                  {currentFact.headline}
-                </h3>
-                
-                {/* Full details - always visible */}
-                <p className="text-white/70 text-sm leading-relaxed mb-4">
-                  {currentFact.details}
-                </p>
-                
-                {/* Source */}
-                {currentFact.source && (
-                  <p className="text-white/30 text-xs font-mono mb-4">
-                    Source: {currentFact.source}
-                  </p>
-                )}
-                
-                {/* Swipe hint */}
-                {hasNext && (
-                  <div className="flex items-center justify-center pt-3 border-t border-white/10">
-                    <span className="text-white/40 text-xs">
-                      swipe for more
-                    </span>
-                  </div>
-                )}
+      {/* Swipeable card */}
+      <motion.div
+        style={{ x }}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.1}
+        onDragEnd={handleDragEnd}
+        className="touch-pan-y"
+      >
+        <motion.div 
+          style={{ x: contentX, opacity }}
+          className="backdrop-blur-2xl bg-black/60 rounded-3xl overflow-hidden border border-white/5"
+        >
+          {/* Card content */}
+          <div className="p-6">
+            {/* Category + loading indicator */}
+            <div className="flex items-center justify-between mb-4">
+              <div className={cn(
+                "inline-flex items-center gap-2 text-xs font-medium tracking-widest uppercase",
+                config.color
+              )}>
+                <Icon className="w-3.5 h-3.5" />
+                {config.label}
               </div>
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="complete"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="backdrop-blur-xl bg-black/50 border border-white/10 rounded-2xl p-8 text-center"
-            >
-              <p className="text-white/50 text-sm mb-1">you&apos;ve explored all</p>
-              <p className="text-2xl font-serif text-white mb-1">{facts.length} facts</p>
-              <p className="text-white/30 text-xs mb-6 lowercase">about {itemName}</p>
-              <button
-                onClick={handleReset}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white text-sm font-medium transition-colors"
+              
+              {isLoadingMore && currentIndex >= facts.length - 2 && (
+                <div className="flex items-center gap-1.5 text-white/30 text-xs">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <span>loading more</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Headline */}
+            <h3 className="text-2xl font-serif text-white leading-tight mb-4">
+              {currentFact.headline}
+            </h3>
+            
+            {/* Details */}
+            <p className="text-white/60 text-[15px] leading-relaxed">
+              {currentFact.details}
+            </p>
+            
+            {/* Source */}
+            {currentFact.source && (
+              <p className="text-white/25 text-xs mt-4 font-mono">
+                {currentFact.source}
+              </p>
+            )}
+          </div>
+
+          {/* Swipe hint footer */}
+          {hasNext && (
+            <div className="px-6 py-4 border-t border-white/5 flex items-center justify-end">
+              <motion.div 
+                className="flex items-center gap-1 text-white/30 text-xs"
+                animate={{ x: [0, 4, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <RotateCcw className="h-4 w-4" />
-                view again
-              </button>
-            </motion.div>
+                <span>swipe</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </motion.div>
+            </div>
           )}
-        </AnimatePresence>
-      </div>
+          
+          {/* End state */}
+          {!hasNext && !isLoadingMore && (
+            <div className="px-6 py-4 border-t border-white/5">
+              <p className="text-white/30 text-xs text-center">
+                you&apos;ve seen all {facts.length} facts
+              </p>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
     </div>
   )
 }

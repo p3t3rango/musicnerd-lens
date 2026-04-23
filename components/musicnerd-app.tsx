@@ -25,10 +25,14 @@ export function MusicNerdApp() {
     setError(null)
 
     try {
+      // Quick analysis - get 3 facts fast
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: imageData })
+        body: JSON.stringify({ 
+          image: imageData,
+          mode: 'quick'
+        })
       })
 
       if (!response.ok) {
@@ -111,7 +115,7 @@ export function MusicNerdApp() {
       )}
 
       {error && (
-        <div className="fixed bottom-4 left-4 right-4 bg-destructive text-destructive-foreground p-4 rounded-xl text-center">
+        <div className="fixed bottom-4 left-4 right-4 bg-destructive/90 backdrop-blur-sm text-white p-4 rounded-2xl text-center text-sm border border-white/10">
           {error}
         </div>
       )}

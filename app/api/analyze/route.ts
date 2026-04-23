@@ -3,24 +3,10 @@ import { NextResponse } from 'next/server'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
-const SYSTEM_PROMPT = `You are MusicNerd, a passionate music encyclopedia with the energy and style of Nardwuar the Human Serviette. You LOVE digging up obscure facts, deep cuts, and surprising connections about music.
+// Quick facts prompt - get 3 fast facts first
+const QUICK_PROMPT = `You are MusicNerd, a passionate music expert. Analyze this image and provide a QUICK response.
 
-When analyzing an image of a record, album cover, concert poster, setlist, music gear, or any music-related item:
-
-1. First, identify what you're looking at (album, artist, poster, setlist, gear, etc.)
-2. Then provide 5-8 fascinating facts about it, covering:
-   - Artist/band history and stories
-   - Album recording details and production
-   - Gear and instruments used
-   - Producer and engineer info
-   - Surprising connections to other artists
-   - Cultural impact and legacy
-
-Your facts should be:
-- Punchy and exciting (like Nardwuar revealing a surprise!)
-- Accurate and specific (names, dates, places)
-- A mix of well-known and obscure information
-- Covering different categories (gear, history, production, connections)
+Identify what you see and give exactly 3 punchy facts. Be fast and exciting!
 
 Respond in this exact JSON format:
 {
@@ -33,20 +19,46 @@ Respond in this exact JSON format:
   "facts": [
     {
       "category": "artist" | "album" | "gear" | "production" | "history" | "connection",
-      "headline": "Short punchy headline (max 10 words)",
-      "details": "Longer explanation with specific details (2-4 sentences)",
-      "source": "Optional source attribution"
+      "headline": "Short punchy headline (max 8 words)",
+      "details": "Quick explanation (1-2 sentences)",
+      "source": "Optional source"
     }
   ]
 }
 
-If you cannot identify the music-related content, set type to "unknown" and provide general music facts or ask for a clearer image.`
+Only 3 facts. Make them count!`
+
+// Deep dive prompt - get 4 more detailed facts
+const DEEP_PROMPT = `You are MusicNerd, a passionate music encyclopedia with Nardwuar energy. 
+
+You already identified this as: {{ITEM_NAME}} ({{ITEM_TYPE}})
+You already shared these facts: {{EXISTING_FACTS}}
+
+Now dig DEEPER. Provide exactly 4 MORE fascinating facts that are:
+- More obscure and surprising
+- Cover different categories than before
+- Include specific details (names, dates, gear models)
+- Connect to other artists or cultural moments
+
+Respond in this exact JSON format:
+{
+  "facts": [
+    {
+      "category": "artist" | "album" | "gear" | "production" | "history" | "connection",
+      "headline": "Short punchy headline (max 8 words)",
+      "details": "Detailed explanation (2-3 sentences)",
+      "source": "Source attribution"
+    }
+  ]
+}
+
+4 new facts only. Make them deep cuts!`
 
 export async function POST(request: Request) {
   try {
-    const { image } = await request.json()
+    const { image, mode = 'quick', context } = await request.json()
 
-    if (!image) {
+    if (!image && mode === 'quick') {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 })
     }
 
@@ -56,41 +68,85 @@ export async function POST(request: Request) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
-    // Extract base64 data from data URL
-    const base64Data = image.replace(/^data:image\/\w+;base64,/, '')
+    if (mode === 'quick') {
+      // Quick analysis - 3 facts fast
+      const base64Data = image.replace(/^data:image\/\w+;base64,/, '')
 
-    const result = await model.generateContent([
-      SYSTEM_PROMPT,
-      {
-        inlineData: {
-          mimeType: 'image/jpeg',
-          data: base64Data
+      const result = await model.generateContent([
+        QUICK_PROMPT,
+        {
+          inlineData: {
+            mimeType: 'image/jpeg',
+            data: base64Data
+          }
         }
+      ])
+
+      const response = await result.response
+      const text = response.text()
+
+      let jsonStr = text
+      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/)
+      if (jsonMatch) {
+        jsonStr = jsonMatch[1]
       }
-    ])
 
-    const response = await result.response
-    const text = response.text()
+      const parsed = JSON.parse(jsonStr.trim())
 
-    // Parse JSON from response (handle markdown code blocks)
-    let jsonStr = text
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/)
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1]
+      const facts = parsed.facts.map((fact: { category: string; headline: string; details: string; source?: string }, index: number) => ({
+        ...fact,
+        id: `fact-${Date.now()}-${index}`
+      }))
+
+      return NextResponse.json({
+        identified: parsed.identified,
+        facts,
+        hasMore: true
+      })
+
+    } else if (mode === 'deep' && context) {
+      // Deep dive - 4 more facts
+      const prompt = DEEP_PROMPT
+        .replace('{{ITEM_NAME}}', context.name)
+        .replace('{{ITEM_TYPE}}', context.type)
+        .replace('{{EXISTING_FACTS}}', context.existingFacts.map((f: { headline: string }) => f.headline).join(', '))
+
+      const base64Data = image.replace(/^data:image\/\w+;base64,/, '')
+
+      const result = await model.generateContent([
+        prompt,
+        {
+          inlineData: {
+            mimeType: 'image/jpeg',
+            data: base64Data
+          }
+        }
+      ])
+
+      const response = await result.response
+      const text = response.text()
+
+      let jsonStr = text
+      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/)
+      if (jsonMatch) {
+        jsonStr = jsonMatch[1]
+      }
+
+      const parsed = JSON.parse(jsonStr.trim())
+
+      const facts = parsed.facts.map((fact: { category: string; headline: string; details: string; source?: string }, index: number) => ({
+        ...fact,
+        id: `fact-deep-${Date.now()}-${index}`
+      }))
+
+      return NextResponse.json({
+        facts,
+        hasMore: false
+      })
     }
 
-    const parsed = JSON.parse(jsonStr.trim())
+    return NextResponse.json({ error: 'Invalid mode' }, { status: 400 })
 
-    // Add IDs to facts
-    const facts = parsed.facts.map((fact: { category: string; headline: string; details: string; source?: string }, index: number) => ({
-      ...fact,
-      id: `fact-${Date.now()}-${index}`
-    }))
-
-    return NextResponse.json({
-      identified: parsed.identified,
-      facts
-    })
   } catch (error) {
     console.error('Analysis error:', error)
     return NextResponse.json(
