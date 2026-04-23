@@ -5,7 +5,7 @@ import { ChevronRight, Disc3, Album, Settings2, Mic2, Clock, Link2 } from 'lucid
 import { cn } from '@/lib/utils'
 import type { MusicFact } from '@/lib/types'
 
-const categoryConfig = {
+const categoryConfig: Record<string, { icon: typeof Mic2; label: string; gradient: string }> = {
   artist: { icon: Mic2, label: 'Artist', gradient: 'from-pink-500/20 to-pink-500/5' },
   album: { icon: Album, label: 'Album', gradient: 'from-blue-500/20 to-blue-500/5' },
   gear: { icon: Settings2, label: 'Gear', gradient: 'from-amber-500/20 to-amber-500/5' },
@@ -14,7 +14,10 @@ const categoryConfig = {
   connection: { icon: Link2, label: 'Connection', gradient: 'from-cyan-500/20 to-cyan-500/5' },
 }
 
-const categoryColors = {
+const defaultConfig = { icon: Disc3, label: 'Fact', gradient: 'from-gray-500/20 to-gray-500/5' }
+const defaultColors = 'text-gray-400 bg-gray-500/10 border-gray-500/20'
+
+const categoryColors: Record<string, string> = {
   artist: 'text-pink-400 bg-pink-500/10 border-pink-500/20',
   album: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
   gear: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
@@ -30,8 +33,8 @@ interface FactCardProps {
 
 export function FactCard({ fact, index }: FactCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const config = categoryConfig[fact.category]
-  const colorClasses = categoryColors[fact.category]
+  const config = categoryConfig[fact.category] || defaultConfig
+  const colorClasses = categoryColors[fact.category] || defaultColors
   const Icon = config.icon
 
   return (
