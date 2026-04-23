@@ -75,42 +75,46 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Gradient overlay - subtle fade from bottom */}
-      <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none" />
+      {/* Gradient overlay - extends higher to cover scroll area */}
+      <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black via-black/80 via-50% to-transparent pointer-events-none" />
       
-      {/* Content anchored to bottom */}
-      <div className="absolute inset-x-0 bottom-0 px-5 pb-6">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            {/* Category tag */}
-            <div className={cn(
-              "inline-flex items-center gap-1.5 text-[10px] font-medium tracking-wider uppercase mb-3",
-              config.color
-            )}>
-              <Icon className="w-3 h-3" />
-              {config.label}
-            </div>
-            
-            {/* Headline */}
-            <h3 className="text-2xl font-serif text-white leading-snug mb-4">
-              {currentFact.headline}
-            </h3>
-            
-            {/* Details */}
-            <p className="text-white/80 text-base leading-relaxed mb-6">
-              {currentFact.details}
-            </p>
-          </motion.div>
-        </AnimatePresence>
+      {/* Content container - bounded area that won't overlap header */}
+      <div className="absolute inset-x-0 bottom-0 top-[28%] flex flex-col px-5 pb-6">
+        {/* Scrollable fact content */}
+        <div className="flex-1 overflow-y-auto min-h-0 mb-4 scrollbar-hide">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="pt-4"
+            >
+              {/* Category tag */}
+              <div className={cn(
+                "inline-flex items-center gap-1.5 text-[10px] font-medium tracking-wider uppercase mb-3",
+                config.color
+              )}>
+                <Icon className="w-3 h-3" />
+                {config.label}
+              </div>
+              
+              {/* Headline */}
+              <h3 className="text-2xl font-serif text-white leading-snug mb-4">
+                {currentFact.headline}
+              </h3>
+              
+              {/* Details */}
+              <p className="text-white/80 text-base leading-relaxed">
+                {currentFact.details}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-        {/* Bottom bar with dots and next hint */}
-        <div className="flex items-center justify-between">
+        {/* Bottom bar with dots and next hint - fixed at bottom */}
+        <div className="flex items-center justify-between flex-shrink-0">
           {/* Dots */}
           <div className="flex items-center gap-2">
             {facts.map((_, i) => (
