@@ -114,22 +114,17 @@ export function ResultsView({ result, onBack, onSave, isSaved }: ResultsViewProp
 
       {/* Identified item info - fixed top left, below nav */}
       <div className="absolute top-20 left-0 right-0 z-20 px-5">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/5 mb-3">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/5 mb-2">
           <Sparkles className="h-3 w-3 text-primary" />
           <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
             {result.identified.type}
           </span>
         </div>
-        <h1 className="text-3xl font-serif text-white text-balance lowercase leading-tight drop-shadow-lg">
+        <h1 className="text-2xl font-serif text-white lowercase leading-tight drop-shadow-lg line-clamp-2">
           {result.identified.name.toLowerCase()}
         </h1>
-        {result.identified.artist && result.identified.artist !== result.identified.name && (
-          <p className="text-base text-white/60 mt-1 drop-shadow-md">
-            {result.identified.artist}
-          </p>
-        )}
         {result.identified.year && (
-          <p className="text-xs text-white/40 mt-0.5 font-mono drop-shadow-md">
+          <p className="text-xs text-white/50 mt-1 font-mono drop-shadow-md">
             {result.identified.year}
           </p>
         )}

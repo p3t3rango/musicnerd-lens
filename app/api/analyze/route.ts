@@ -4,47 +4,47 @@ import { NextResponse } from 'next/server'
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 // Quick facts prompt - get 3 fast facts first
-const QUICK_PROMPT = `You are MusicNerd, finding REAL music connections in anything you see.
+const QUICK_PROMPT = `You are MusicNerd. Identify what's in this image and find music connections.
 
-CRITICAL IDENTIFICATION RULES:
-1. Describe EXACTLY what you see in the image - objects, clothing, products, logos
-2. If you see a person, describe what they're WEARING or HOLDING, not who they are
-3. If you see merchandise (shirts, posters, toys), identify the CHARACTER/BRAND on it
-4. NEVER guess that something is a specific musician unless you see clear identifying features
-5. A person in a Batman shirt = "Batman merchandise" NOT some random artist name
+IDENTIFICATION RULES:
+- Use SHORT, SIMPLE names (1-4 words max)
+- Examples: "Pokeball", "Batman Shirt", "Fender Stratocaster", "Abbey Road Album"
+- NEVER write descriptions. Just the name.
+- If you see a person, identify what they're wearing/holding, not guess who they are
+- Focus on the MAIN subject, not every detail
 
-EXAMPLES OF CORRECT IDENTIFICATION:
-- Person wearing Batman shirt → type: "product", name: "Batman T-Shirt/Merchandise"
-- Lego Batman figure → type: "toy", name: "Lego Batman Minifigure"  
-- Person holding a guitar → type: "gear", name: "Guitar" (describe the guitar, not guess who owns it)
-- Album cover clearly visible → type: "album", name: "[actual album name]"
-- Concert poster with artist name → type: "poster", name: "[artist on poster]"
+NAME EXAMPLES:
+- Red/white ball toy → name: "Pokeball"
+- Person in Batman shirt → name: "Batman Shirt"  
+- Lego figure of Batman → name: "Lego Batman"
+- Purple bunny figure → name: "Labubu Figure"
+- Guitar → name: "Fender Stratocaster" (or brand if visible)
 
-THEN find 3 REAL music connections based on what you ACTUALLY identified:
-- Batman → Hans Zimmer's Dark Knight score, Danny Elfman's Batman theme, Prince's Batman soundtrack
-- Guitar brand → Famous players of that brand, songs recorded with it
-- Any product → Music in its commercials, musicians who endorse it, songs about it
+Then find 3 REAL music connections:
+- Pokemon → Game soundtrack by Junichi Masuda, Pokemon theme song, etc.
+- Batman → Hans Zimmer score, Danny Elfman theme, Prince soundtrack
+- Any product → Related soundtracks, ad music, musician endorsements
 
-Respond in JSON:
+JSON format:
 {
   "identified": {
-    "type": "album" | "artist" | "poster" | "setlist" | "gear" | "toy" | "movie" | "product" | "clothing" | "other",
-    "name": "Describe what you ACTUALLY see",
-    "artist": "Only if clearly identifiable",
+    "type": "album" | "artist" | "poster" | "gear" | "toy" | "product" | "other",
+    "name": "Short name (1-4 words)",
+    "artist": "If applicable",
     "year": "If known"
   },
   "facts": [
     {
       "category": "artist" | "album" | "gear" | "production" | "history" | "connection" | "soundtrack" | "cultural",
       "headline": "Short headline (max 8 words)",
-      "details": "Real, verifiable facts (1-2 sentences)",
+      "details": "1-2 sentences of real facts",
       "source": "Wikipedia, IMDb, etc.",
-      "sourceUrl": "https://real-source-url.com"
+      "sourceUrl": "https://source-url.com"
     }
   ]
 }
 
-3 facts. All must be TRUE and about what you ACTUALLY see.`
+3 facts only.`
 
 // Deep dive prompt - get 4 more detailed facts
 const DEEP_PROMPT = `You are MusicNerd, a passionate music encyclopedia with Nardwuar energy. 

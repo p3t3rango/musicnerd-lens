@@ -83,11 +83,11 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-      {/* Gradient overlay - extends higher to cover scroll area */}
-      <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black via-black/80 via-50% to-transparent pointer-events-none" />
+      {/* Gradient overlay - covers bottom half */}
+      <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black via-black/90 via-60% to-transparent pointer-events-none" />
       
-      {/* Content container - bounded area that won't overlap header */}
-      <div className="absolute inset-x-0 bottom-0 top-[28%] flex flex-col px-5 pb-6">
+      {/* Content container - starts below header area */}
+      <div className="absolute inset-x-0 bottom-0 top-[45%] flex flex-col px-5 pb-6">
         {/* Scrollable fact content */}
         <div 
           className="fact-scroll flex-1 overflow-y-auto min-h-0 mb-4"
