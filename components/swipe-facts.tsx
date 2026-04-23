@@ -75,11 +75,11 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Gradient overlay covering bottom 60% of screen */}
-      <div className="absolute inset-x-0 bottom-0 h-[65%] bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none" />
+      {/* Gradient overlay - subtle fade from bottom */}
+      <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none" />
       
-      {/* Content area - starts from 40% down the screen */}
-      <div className="absolute inset-x-0 bottom-0 top-[35%] flex flex-col justify-end px-5 pb-8">
+      {/* Content anchored to bottom */}
+      <div className="absolute inset-x-0 bottom-0 px-5 pb-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -87,7 +87,6 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="flex flex-col"
           >
             {/* Category tag */}
             <div className={cn(
@@ -104,14 +103,14 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
             </h3>
             
             {/* Details */}
-            <p className="text-white/80 text-base leading-relaxed">
+            <p className="text-white/80 text-base leading-relaxed mb-6">
               {currentFact.details}
             </p>
           </motion.div>
         </AnimatePresence>
 
         {/* Bottom bar with dots and next hint */}
-        <div className="mt-auto pt-8 flex items-center justify-between">
+        <div className="flex items-center justify-between">
           {/* Dots */}
           <div className="flex items-center gap-2">
             {facts.map((_, i) => (
