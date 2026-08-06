@@ -120,8 +120,8 @@ export function ResultsView({ result, onBack, onSave, isSaved }: ResultsViewProp
             {result.identified.type}
           </span>
         </div>
-        <h1 className="text-2xl font-serif text-white lowercase leading-tight drop-shadow-lg line-clamp-2">
-          {result.identified.name.toLowerCase()}
+        <h1 className="text-3xl font-display uppercase text-white leading-[0.95] tracking-tight drop-shadow-lg line-clamp-2">
+          {result.identified.name}
         </h1>
         {result.identified.year && (
           <p className="text-xs text-white/50 mt-1 font-mono drop-shadow-md">

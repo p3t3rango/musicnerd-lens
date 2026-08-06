@@ -36,7 +36,7 @@ export function HistoryView({ history, onBack, onSelect, onDelete, onClear }: Hi
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="font-serif font-medium text-lg text-foreground lowercase">scan history</h1>
+          <h1 className="font-display uppercase text-xl tracking-tight text-foreground">scan history</h1>
           {history.length > 0 ? (
             <Button 
               variant="ghost" 

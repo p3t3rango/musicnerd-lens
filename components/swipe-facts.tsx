@@ -139,7 +139,7 @@ export function SwipeFacts({ facts, isLoadingMore, onRequestMore }: SwipeFactsPr
               </div>
               
               {/* Headline */}
-              <h3 className="text-2xl font-serif text-white leading-snug mb-4">
+              <h3 className="text-3xl font-display uppercase text-white leading-[0.95] tracking-tight mb-4 text-balance">
                 {currentFact.headline}
               </h3>
               

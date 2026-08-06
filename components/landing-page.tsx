@@ -30,9 +30,9 @@ export function LandingPage({ onStartScan, onOpenHistory, historyCount }: Landin
 
   return (
     <div className="h-screen bg-background relative overflow-hidden">
-      {/* Subtle gradient orb */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[150px]" />
-      
+      {/* Hot pink glow orb */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary/15 rounded-full blur-[140px]" />
+
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col">
         {/* Minimal header - just history button */}
@@ -53,56 +53,57 @@ export function LandingPage({ onStartScan, onOpenHistory, historyCount }: Landin
         </header>
 
         {/* Hero */}
-        <main className="flex-1 flex flex-col items-center justify-center px-6 pb-20">
-          <div className="text-center max-w-md">
-            {/* Logo - no background, transparent */}
+        <main className="flex-1 flex flex-col items-center justify-center px-6 pb-16">
+          <div className="text-center max-w-md w-full">
+            {/* Logo */}
             <div className="mb-8 relative inline-block">
-              <div className="absolute inset-0 bg-primary/30 rounded-full blur-3xl scale-150" />
+              <div className="absolute inset-0 bg-primary/40 rounded-full blur-3xl scale-110" />
               <Image
-                src="/icon-512x512.png"
+                src="/musicnerd-logo.png"
                 alt="MusicNerd"
-                width={120}
-                height={120}
+                width={128}
+                height={128}
                 className="relative drop-shadow-2xl"
+                priority
               />
             </div>
 
-            {/* Title with rotating word */}
-            <div className="mb-3">
-              <h1 className="text-4xl sm:text-5xl font-serif text-foreground tracking-tight whitespace-nowrap">
-                music{' '}
-                <span 
-                  className={`inline-block text-primary transition-all duration-200 ${
-                    isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
-                  }`}
-                >
-                  {rotatingWords[wordIndex]}
-                </span>
-              </h1>
-            </div>
+            {/* Title with rotating word - bold condensed display */}
+            <h1 className="font-display text-6xl sm:text-7xl uppercase tracking-tight leading-[0.9] text-foreground whitespace-nowrap">
+              music{' '}
+              <span
+                className={`inline-block text-primary transition-all duration-200 ${
+                  isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
+                }`}
+              >
+                {rotatingWords[wordIndex]}
+              </span>
+            </h1>
 
-            {/* App name */}
-            <p className="text-sm text-muted-foreground tracking-widest uppercase mb-8">
-              Lens
-            </p>
+            {/* App name badge */}
+            <div className="mt-3 mb-8 flex justify-center">
+              <span className="font-display text-sm uppercase tracking-[0.4em] text-primary-foreground bg-primary px-3 py-1">
+                Lens
+              </span>
+            </div>
 
             <p className="text-muted-foreground text-base leading-relaxed mb-10 text-pretty">
               Point your camera at any record, poster, or setlist. Get deep cuts, gear specs, and stories that make you go{' '}
-              <span className="text-foreground font-medium">{'"'}wait, really?!{'"'}</span>
+              <span className="text-foreground font-semibold">{'"'}wait, really?!{'"'}</span>
             </p>
 
             {/* CTA Button */}
             <Button
               size="lg"
               onClick={onStartScan}
-              className="w-full h-14 text-base font-semibold gap-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full h-14 text-base font-bold uppercase tracking-wide gap-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98]"
             >
               <Camera className="h-5 w-5" />
               Start Scanning
             </Button>
 
             {/* Feature pills */}
-            <div className="mt-10 flex flex-wrap justify-center gap-2">
+            <div className="mt-8 flex flex-wrap justify-center gap-2">
               <FeaturePill icon={Disc3} label="Albums" />
               <FeaturePill icon={Mic2} label="Artists" />
               <FeaturePill icon={Headphones} label="Gear" />
@@ -113,9 +114,9 @@ export function LandingPage({ onStartScan, onOpenHistory, historyCount }: Landin
 
         {/* Footer */}
         <footer className="p-5 text-center">
-          <a 
-            href="https://musicnerd.xyz" 
-            target="_blank" 
+          <a
+            href="https://musicnerd.xyz"
+            target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
           >

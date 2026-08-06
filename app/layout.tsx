@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Libre_Baskerville } from 'next/font/google'
+import { Inter, Anton } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
@@ -7,10 +7,10 @@ const inter = Inter({
   subsets: ["latin"],
   variable: '--font-sans',
 });
-const libreBaskerville = Libre_Baskerville({ 
+const anton = Anton({ 
   subsets: ["latin"],
-  variable: '--font-serif',
-  weight: ['400', '700']
+  variable: '--font-display',
+  weight: ['400']
 });
 
 export const metadata: Metadata = {
@@ -34,7 +34,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#1a1625',
+  themeColor: '#0a0a0a',
 }
 
 export default function RootLayout({
@@ -44,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${libreBaskerville.variable} font-sans antialiased bg-background`}>
+      <body className={`${inter.variable} ${anton.variable} font-sans antialiased bg-background`}>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

@@ -95,7 +95,7 @@ export function AnalyzingView({ imageUrl }: AnalyzingViewProps) {
 
         {/* Text */}
         <div className="text-center">
-          <h2 className="text-2xl font-serif font-medium text-foreground mb-2 lowercase">
+          <h2 className="text-3xl font-display uppercase tracking-tight text-foreground mb-2">
             analyzing
           </h2>
           <p className="text-muted-foreground h-6 transition-opacity duration-200">
