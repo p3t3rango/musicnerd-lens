@@ -1,5 +1,10 @@
 # musicnerd-lens
 
+## Originator and creative direction
+
+Concept, editorial direction and creative development by **[Pete Rango](https://github.com/p3t3rango)**, built with AI assistance. Music Nerd is the publishing context; repository ownership does not replace the creator credit.
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
 
 ## Built with v0
